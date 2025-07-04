@@ -1,0 +1,12 @@
+[submodule "FinNLP"]
+	path = FinNLP
+	url = https://github.com/AI4Finance-Foundation/FinGPT.git
+[submodule "FinRLmeta"]
+	path = FinRLmeta
+	url = https://github.com/AI4Finance-Foundation/FinRL-Meta.git
+[submodule "FinRobot"]
+	path = FinRobot
+	url = https://github.com/AI4Finance-Foundation/FinRobot.git
+[submodule "TensorRT-LLM"]
+	path = TensorRT-LLM
+	url = https://github.com/NVIDIA/TensorRT-LLM.git
