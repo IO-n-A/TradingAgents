@@ -1,0 +1,3 @@
+FROM base-llama3-8b-dvc
+ADAPTER ./data/lora_adapters/fingpt-mt_llama3-8b_lora/adapter_model.bin
+# Add any other necessary parameters if known (e.g., TEMPLATE, SYSTEM)

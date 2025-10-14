@@ -1,0 +1,124 @@
+# MLOps/monitoring/alerts/alertmanager_rules.yaml
+# Example Alertmanager alerting rules for the FinAI_algo MLOps pipelines.
+# These rules are intended to be used with Prometheus and Alertmanager.
+# The actual metrics (e.g., `pipeline_last_success_status`) need to be exposed
+# by your pipeline components and scraped by Prometheus.
+
+groups:
+- name: FinAIAlgoMLOpsAlerts
+  rules:
+  # --- Data Ingestion Pipeline Alerts ---
+  - alert: DataIngestionPipelineFailure
+    expr: pipeline_job_success_status{job="data_ingestion_pipeline"} == 0 # Assuming 0 for failure, 1 for success
+    for: 15m # Alert if failed for 15 minutes (e.g., 3 consecutive runs if it runs every 5 mins)
+    labels:
+      severity: critical
+      service: mlops_data_ingestion
+    annotations:
+      summary: "Data Ingestion Pipeline has failed for 15 minutes"
+      description: "The data ingestion pipeline (job 'data_ingestion_pipeline') has been reporting failure status for the last 15 minutes. Check logs and pipeline status immediately. Raw data might be stale. Instance: {{ $labels.instance }}"
+
+  - alert: NoNewDataIngested
+    expr: time() - pipeline_last_successful_ingestion_timestamp_seconds{job="data_ingestion_pipeline"} > 3600 # Alert if no successful ingestion in 1 hour
+    labels:
+      severity: warning
+      service: mlops_data_ingestion
+    annotations:
+      summary: "No new data successfully ingested by Data Ingestion Pipeline for over 1 hour"
+      description: "The data ingestion pipeline has not reported a successful data ingestion in the last hour. This could indicate an issue with data sources or the pipeline itself. Instance: {{ $labels.instance }}"
+
+  # --- Feature Engineering Pipeline Alerts ---
+  - alert: FeatureEngineeringPipelineFailure
+    expr: pipeline_job_success_status{job="feature_engineering_pipeline"} == 0
+    for: 10m
+    labels:
+      severity: critical
+      service: mlops_feature_engineering
+    annotations:
+      summary: "Feature Engineering Pipeline has failed for 10 minutes"
+      description: "The feature engineering pipeline (job 'feature_engineering_pipeline') is failing. Processed data for model training/inference might be unavailable or stale. Instance: {{ $labels.instance }}"
+
+  # --- Sentiment Model Training Pipeline Alerts ---
+  - alert: SentimentModelTrainingFailure
+    expr: pipeline_job_success_status{job="sentiment_model_training_pipeline"} == 0
+    for: 5m # Shorter duration as training might be manually triggered or less frequent
+    labels:
+      severity: warning # Or critical depending on automation level
+      service: mlops_sentiment_training
+    annotations:
+      summary: "Sentiment Model Training Pipeline has failed"
+      description: "The sentiment model training pipeline (job 'sentiment_model_training_pipeline') reported a failure. Check training logs. Instance: {{ $labels.instance }}"
+
+  - alert: SentimentModelLowAccuracy
+    # This metric would come from MLflow or a custom evaluation step that exports it
+    expr: sentiment_model_validation_accuracy < 0.70 # Example threshold
+    # This alert might be better triggered at the end of a training run rather than continuously.
+    # For continuous monitoring, this would apply to a deployed model's inference accuracy if tracked.
+    labels:
+      severity: warning
+      service: mlops_sentiment_model
+    annotations:
+      summary: "Sentiment Model validation accuracy is low ({{ $value }})"
+      description: "The latest trained sentiment model shows a validation accuracy of {{ $value }}, which is below the threshold of 0.70. Review model performance."
+
+  # --- RL Agent Training Pipeline Alerts ---
+  - alert: RLAgentTrainingFailure
+    expr: pipeline_job_success_status{job="rl_agent_training_pipeline"} == 0
+    for: 5m
+    labels:
+      severity: warning # Or critical
+      service: mlops_rl_training
+    annotations:
+      summary: "RL Agent Training Pipeline has failed"
+      description: "The RL agent training pipeline (job 'rl_agent_training_pipeline') reported a failure. Check training logs. Instance: {{ $labels.instance }}"
+
+  - alert: RLAgentBacktestPerformanceDegradation
+    # Metric from backtesting results (e.g., Sharpe ratio)
+    expr: rl_agent_backtest_sharpe_ratio < 0.5 # Example threshold
+    # This alert would typically be triggered after a new model is backtested.
+    labels:
+      severity: warning
+      service: mlops_rl_agent
+    annotations:
+      summary: "RL Agent backtest Sharpe Ratio is low ({{ $value }})"
+      description: "The latest backtested RL agent shows a Sharpe Ratio of {{ $value }}, which is below the threshold of 0.5. Review model performance and backtest results."
+
+  # --- General Pipeline/System Alerts ---
+  - alert: HighErrorRateInPipelineComponent
+    expr: sum(rate(pipeline_component_errors_total{job=~".*_pipeline"}[5m])) by (job, component) > 5 # Example: more than 5 errors per minute
+    labels:
+      severity: warning
+      service: mlops_pipelines
+    annotations:
+      summary: "High error rate in MLOps pipeline component {{ $labels.component }} for job {{ $labels.job }}"
+      description: "Component {{ $labels.component }} in job {{ $labels.job }} is experiencing a high error rate. Value: {{ $value }} errors/min. Instance: {{ $labels.instance }}"
+
+  # --- Paper Trading Alerts (if applicable and metrics are exposed) ---
+  - alert: PaperTradingBotNotRunning
+    expr: up{job="paper_trading_bot"} == 0 # If the bot exposes an 'up' metric
+    for: 10m
+    labels:
+      severity: critical
+      service: mlops_paper_trading
+    annotations:
+      summary: "Paper Trading Bot is down"
+      description: "The paper trading bot (job 'paper_trading_bot') is not reporting as up. Check its status immediately. Instance: {{ $labels.instance }}"
+
+  - alert: PaperTradingHighOrderFailureRate
+    expr: rate(paper_trading_order_failures_total[10m]) / rate(paper_trading_orders_submitted_total[10m]) > 0.1 # More than 10% failure rate
+    for: 5m
+    labels:
+      severity: warning
+      service: mlops_paper_trading
+    annotations:
+      summary: "High order failure rate in Paper Trading Bot"
+      description: "The paper trading bot is experiencing an order failure rate of {{ $value | humanizePercentage }}. Check Alpaca status and bot logs. Instance: {{ $labels.instance }}"
+
+# Note:
+# - The metric names (e.g., `pipeline_job_success_status`, `sentiment_model_validation_accuracy`) are examples.
+#   You need to define and expose these metrics from your Python scripts/pipelines using a Prometheus client library
+#   (e.g., prometheus_client for Python).
+# - `job` labels in `expr` should match the job names configured in your Prometheus scrape config.
+# - `for` duration specifies how long the condition must be true before an alert fires.
+# - `labels` add identifying information to the alert.
+# - `annotations` provide more detailed information about the alert.

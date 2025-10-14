@@ -1,0 +1,103 @@
+# Configuration for data ingestion pipeline
+# Defines sources, parameters, and output locations for data fetching.
+
+# Common parameters for data fetching
+common_params:
+  # Test parameters - use a small set for development
+  test_ticker_list: ["AAPL", "MSFT"] # For Yahoo Finance and general stock news
+  test_start_date: "2023-01-01"
+  test_end_date: "2023-01-07"
+  # Production parameters (example - to be adjusted)
+  # prod_ticker_list: ["AAPL", "MSFT", "GOOGL", "AMZN", "TSLA"]
+  # prod_start_date: "2020-01-01"
+  # prod_end_date: "YYYY-MM-DD" # Placeholder for dynamic end date, e.g., today
+
+# Yahoo Finance stock data configuration
+yahoo_finance:
+  enabled: true
+  # Ticker list and dates will be taken from common_params based on run mode (test/prod)
+  output_path: "data/raw/stock_data/" # Base path, filename will include tickers and timestamp
+  filename_prefix: "yahoodata"
+  auto_adjust_prices: false # Set to true if you want yfinance to handle adjustments
+
+# News data configuration
+news_data:
+  enabled: true
+  # Ticker list and dates will be taken from common_params
+  output_path: "data/raw/news_data/" # Base path
+  filename_prefix: "newsdata" # Note: market_news_scheduled_ingest.py currently doesn't use this filename_prefix for individual files.
+  sources:
+    - source_name: "finnhub"
+      enabled: true # Strategy I can use Finnhub as a source
+      category: "general" # Default category for Finnhub, can be overridden by script's --category arg if script is modified.
+                          # For Strategy I, 'general', 'technology', 'business' might be relevant.
+      # API key is loaded from config/api_keys.yaml by the script
+      # Finnhub specific parameters (if any more are needed by the script)
+      # api_call_delay: 1.0 # Default is 1.0 sec in script, based on 60 req/min
+    - source_name: "newsapi"
+      enabled: true # Enable NewsAPI for Strategy I
+      # API key is loaded from config/api_keys.yaml by the script
+      queries: [
+        "US stock market", "NASDAQ", "S&P 500", "Dow Jones", "US economy",
+        "Federal Reserve", "interest rates", "inflation", "US equities",
+        "financial results", "corporate earnings", "market sentiment", "economic outlook"
+      ] # Queries relevant for Strategy I
+      language: "en"
+      sort_by: "publishedAt" # Options: relevancy, popularity, publishedAt
+      page_size: 100 # Max allowed by NewsAPI on free/dev tier per request
+      # api_call_delay: 0.5 # Not strictly needed for NewsAPI daily limit, but good for politeness if making many queries.
+                           # The script currently doesn't implement a delay between NewsAPI queries.
+    # - source_name: "alphavantage_news" # Example of another source
+    #   enabled: false
+
+# Data paths
+data_paths:
+  raw_stock_data_dir: "data/raw/stock_data"    # Directory for pipeline-generated stock data
+  raw_news_data_dir: "data/raw/news_data"      # Directory for pipeline-generated news data
+  processed_data_dir: "data/processed"         # Directory for processed data
+  test_stock_data_file: "test_raw_data/raw_financial_data.csv" # Specific DVC-tracked test file for stock/financial data
+  test_news_data_file: "test_raw_data/raw_news_data.csv"       # Specific DVC-tracked test file for news data
+  # Versioning/timestamping format for filenames
+  timestamp_format: "%Y%m%d_%H%M%S"
+
+# Feature Engineering settings
+feature_engineering:
+  # Parameters for FinRL's FeatureEngineer
+  feature_engineer_params:
+    use_technical_indicator: true
+    # tech_indicator_list: ["macd", "rsi_30", "cci_30", "dx_30"] # Example, defaults to finrl.config.INDICATORS if not provided
+    use_vix: false # Set to true to add VIX index
+    use_turbulence: false # Set to true to add turbulence index (if data supports it)
+    user_defined_feature: false # Set to true to add custom features defined in FeatureEngineer
+    use_sentiment_features: false # Set to true if pre-computed sentiment scores are in the input df and need further processing by FeatureEngineer
+
+# Data Processing settings (for FinRL's DataProcessor)
+data_processing:
+  # Parameters for FinRL's DataProcessor
+  # The 'data_source' is used by DataProcessor to know how to handle the data,
+  # even if we are not using its download capabilities in this script.
+  # It should match the source of the raw data (e.g., "yahoofinance").
+  data_processor_params:
+    data_source: "yahoofinance" # Example, adjust if your raw data comes from a different FinRL-supported source
+    # news_source_config: null # Path to news API config if DataProcessor were to fetch news
+    # sentiment_model_config: null # Path to sentiment model config if DataProcessor were to run sentiment analysis
+
+# Logging configuration (basic, can be expanded)
+# Note: build_features.py has its own specific logging setup for now.
+# This section might be used for a centralized MLOps logging configuration later.
+global_logging:
+  level: "INFO" # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  # log_file: "logs/mlops_pipeline.log" # Example for a general log
+
+# Strategy I Specific Data Configuration
+strategy_1_data_config:
+  us_equity_tickers: [
+    "AAPL", "MSFT", "GOOGL", "AMZN", "TSLA", "NVDA", "BRK-B", "JPM", "JNJ", "V",
+    "PG", "UNH", "HD", "MA", "BAC", "DIS", "PYPL", "ADBE", "CMCSA", "NFLX",
+    "PEP", "CSCO", "INTC", "TMO", "AVGO", "COST", "TXN", "ABT", "LLY", "PFE",
+    "MRK", "KO", "NKE", "MCD", "MDT", "HON", "NEE", "UPS", "PM", "RTX",
+    "IBM", "GS", "CAT", "MMM", "BA", "AXP", "CVX", "WMT", "CRM", "VZ"
+  ]
+  vix_ticker: "^VIX"
+  # Add other Strategy I specific data parameters here if needed in the future,
+  # e.g., specific start/end dates for historical backfills, news keywords for this strategy.

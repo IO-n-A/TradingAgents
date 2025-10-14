@@ -1,0 +1,68 @@
+# MLOps/config/environments/stock_trading_env_config.yaml
+
+# Default parameters for StockTradingEnv or SentimentAwareStockTradingEnv
+# These values can be overridden by specific experiment configurations.
+
+# Environment Class (e.g., StockTradingEnv, SentimentAwareStockTradingEnv - to be created)
+# This might be dynamically chosen in the pipeline script based on whether sentiment is used.
+# For now, let's assume a base StockTradingEnv from FinRL.
+# env_class_name: "StockTradingEnv" # Or "SentimentAwareStockTradingEnv"
+
+# Stock dimension - will be determined by the dataset used in the pipeline
+# stock_dim: null # Example: 30 for DOW_30_TICKER
+
+# Maximum number of shares to trade in one transaction
+hmax: 100 # Example value from FinRL
+
+# Initial cash amount
+initial_amount: 1000000 # Example value from FinRL
+
+# Transaction cost percentages
+# These can be single floats if uniform across all assets, or lists matching stock_dim
+buy_cost_pct: 0.001 # Example value
+sell_cost_pct: 0.001 # Example value
+
+# Reward scaling factor
+reward_scaling: 1.0 # Example value, can be 1e-4 as seen in some FinRL examples
+
+# State space dimension - will be determined by features used
+# state_space: null # Example: 1 (cash) + stock_dim (prices) + stock_dim (shares) + (stock_dim * num_tech_indicators)
+
+# Action space dimension - typically equals stock_dim
+# action_space: null
+
+# List of technical indicators to use
+# Refer to FinRobot/finrl/config.py or FinRobot/finrl/meta/meta_config.py for examples
+tech_indicator_list:
+  - "macd"
+  - "rsi_30"
+  # Add sentiment-derived features here once defined, e.g.:
+  # - "sentiment_score_composite"
+  # - "sentiment_label"
+  # - "sentiment_momentum"
+
+# Turbulence threshold for risk management
+# If using FinRL's turbulence index, a typical value might be around 100-200.
+# If not using, set to null or a very high number.
+turbulence_threshold: 100 # Example value, adjust based on data and strategy
+
+# Column name for the risk indicator (e.g., turbulence) in the DataFrame
+risk_indicator_col: "turbulence"
+
+# Whether to make plots during training/testing (can be overridden)
+make_plots: False
+
+# Print verbosity during environment steps
+print_verbosity: 20
+
+# Number of initial shares for each stock (can be all zeros)
+# num_stock_shares: [] # Example: [0, 0, ..., 0] - length should match stock_dim
+
+# --- Parameters specific to Sentiment-Aware Environment (if different) ---
+# These would be used if a SentimentAwareStockTradingEnv class is created.
+
+# Example: How to aggregate sentiment scores (e.g., 'mean', 'weighted_mean', 'latest')
+# sentiment_aggregation_method: "mean"
+
+# Example: Window for rolling sentiment features
+# sentiment_rolling_window: 5

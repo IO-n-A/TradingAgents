@@ -1,0 +1,64 @@
+# MLOps/config/feature_engineering_config.yaml
+
+# Configuration for the feature engineering pipeline (MLOps/pipelines/feature_engineering/build_features.py)
+
+# --- Sentiment Analysis Integration ---
+sentiment_analysis:
+  enabled: true # Master switch for including sentiment analysis in this pipeline
+
+  # Specifies which sentiment model configuration to use for inference.
+  # This should point to a YAML file under MLOps/config/sentiment_models/
+  # That file contains details like base model path, LoRA adapter path, tokenizer, quantization.
+  sentiment_model_config_to_use: "llama3_8b_lora_params.yaml" # Example: "chatglm2_6b_strategy1_lora_params.yaml" or "llama3_8b_lora_params.yaml"
+
+  # Parameters for FinRobot.finrl.meta.preprocessor.sentiment_text_preprocessor.SentimentTextPreprocessor
+  prompt_instruction_template: "Instruction: What is the sentiment of this news? Please choose an answer from {negative/neutral/positive}.\nInput: {input}\nAnswer: "
+
+  # Parameters for FinRobot.finrl.sentiment_analyzer_service.SentimentAnalyzerService
+  # These are often derived from the sentiment_model_config_to_use, but can be overridden here if needed.
+  # device: "auto" # "cuda", "cpu", or "auto". If "auto", service will try to use GPU if available.
+  # torch_dtype_str: "auto" # e.g., "float16", "bfloat16", "auto". For model loading.
+  prediction_max_new_tokens: 10 # Max tokens for the sentiment label itself (e.g., "positive")
+
+  # Aggregation strategy for multiple news items per day/ticker for merging with stock data
+  # Options:
+  #   "mean_probs": Calculates mean of positive, negative, neutral probabilities and news count.
+  #   "first_label": (If direct labels are output by model) Takes the first encountered label.
+  #   "majority_vote_label": (If direct labels) Takes the majority vote.
+  #   "count_sentiment": Counts occurrences of positive, negative, neutral labels.
+  sentiment_aggregation_strategy: "mean_probs"
+  # Column in news_df containing the text to analyze (e.g., 'summary', 'full_text', 'headline')
+  news_text_column_to_analyze: "summary" # or 'full_text' if available and preferred
+
+# --- FinRL Feature Engineering Parameters ---
+# Parameters for FinRobot.finrl.meta.preprocessor.preprocessors.FeatureEngineer
+# and FinRobot.finrl.meta.data_processor.DataProcessor methods
+feature_engineer_params:
+  use_technical_indicator: true
+  # tech_indicator_list: ["macd", "rsi_30", "cci_30", "dx_30"] # Example, if not specified, uses DEFAULT_INDICATORS from finrl.config
+  # If empty or not provided, DEFAULT_INDICATORS from finrl.config will be used by DataProcessor.add_technical_indicator
+  
+  use_vix: true # Whether to attempt to download and add VIX data
+  vix_ticker: "^VIX" # Ticker for VIX data
+
+  use_turbulence: true # Whether to calculate and add a turbulence index
+  # turbulence_lookback_period: 252 # Default in FinRL's DataProcessor for turbulence calculation
+  # turbulence_std_dev_multiplier: 2 # Default in FinRL's DataProcessor
+
+  user_defined_feature: false # Set to true if you have custom features to add via FeatureEngineer
+
+  # This flag is for FinRL's FeatureEngineer. If true, it might expect specific sentiment column names.
+  # Our pipeline adds 'daily_sentiment_positive_mean', etc. FeatureEngineer might need adaptation
+  # or these columns are used directly by the RL environment.
+  use_sentiment_features_in_finrl_fe: false 
+
+# Parameters for FinRL's DataProcessor (primarily for cleaning and final array conversion if used later)
+# The build_features.py script uses DataProcessor mainly for add_technical_indicator, add_vix, add_turbulence, and clean_data.
+data_processor_params:
+  # This data_source is used by DataProcessor if it needs to download data for VIX/turbulence,
+  # or for its internal logic. Should match the source of your primary financial data.
+  data_source: "yahoofinance" 
+
+# --- DVC Tracking ---
+dvc_tracking:
+  enabled: true # Whether to run 'dvc add' on the output directory

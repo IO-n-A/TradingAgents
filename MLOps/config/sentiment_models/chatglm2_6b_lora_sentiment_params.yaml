@@ -1,0 +1,73 @@
+# MLOps/config/sentiment_models/chatglm2_6b_strategy1_lora_params.yaml
+# Renamed and repurposed from llama3_8b_lora_params.yaml
+
+# Parameters for ChatGLM2-6B model fine-tuned with LoRA for sentiment analysis (Strategy I).
+# Values are based on FinGPT configurations and Strategy I documentation.
+
+general_config:
+  # These paths would typically be set by the MLOps orchestrator when calling execute_fingpt_sentiment_finetune.py,
+  # or this config file would be dynamically generated/updated with them.
+  # For now, they are placeholders.
+  train_jsonl_path: "data/processed/fingpt_finetune_datasets/us_equity_sentiment_YYYYMMDD_train.jsonl"
+  validation_jsonl_path: "data/processed/fingpt_finetune_datasets/us_equity_sentiment_YYYYMMDD_validation.jsonl"
+  base_model_name: "models/THUDM_chatglm2-6b/" # Local path to downloaded ChatGLM2-6B
+  tokenizer_name: "models/THUDM_chatglm2-6b/" # Should match base_model
+  # peft_model_to_load_for_further_finetuning: null # Optional: if continuing from a previous LoRA
+
+hyperparameters:
+  # LoRA Configuration (from lora_config)
+  # The underlying script (e.g., run_sentiment_lora_finetune_chatglm2.py)
+  # needs to accept these as command line args like --lora_r, --lora_alpha etc.
+  lora_r: 8
+  lora_alpha: 32
+  lora_dropout: 0.1
+  # target_modules: ["query_key_value"] # How this is passed depends on the script.
+  # If script takes a list string: target_modules_str: '["query_key_value"]'
+  # Or if it takes multiple args: --target_modules query_key_value (less likely for lists)
+  # For ChatGLM2, often handled internally by the script based on model type or not explicitly set for LoRA.
+  # We'll assume the FinGPT script handles target_modules appropriately for ChatGLM2 if not specified here.
+  # bias: "none" # Handled by PEFT defaults or script
+  # task_type: "CAUSAL_LM" # Usually inferred by AutoModel or set in script
+
+  # Quantization Configuration (from quantization_config)
+  # The script needs to accept --load_in_8bit, --load_in_4bit etc.
+  load_in_8bit: True
+  # load_in_4bit: False
+  # bnb_4bit_quant_type: "nf4"
+  # bnb_4bit_use_double_quant: True
+  # bnb_4bit_compute_dtype: "torch.float16" # Script might take this as string
+
+  # Training Parameters (from training_parameters)
+  # The script needs to accept these as command line args.
+  # output_dir is handled by execute_fingpt_sentiment_finetune.py (temp_output_dir)
+  logging_steps: 100
+  num_train_epochs: 2
+  per_device_train_batch_size: 4
+  gradient_accumulation_steps: 8
+  learning_rate: 0.0001
+  weight_decay: 0.01
+  warmup_steps: 500
+  # warmup_ratio: 0.03
+  save_steps: 500
+  fp16: True
+  # deepspeed_config_path: null # Path if using deepspeed
+  # torch_compile: False
+  load_best_model_at_end: True
+  evaluation_strategy: "steps"
+  remove_unused_columns: False # Usually True for HF Trainer
+  max_seq_length: 512
+
+# instruction_template is not directly used by execute_fingpt_sentiment_finetune.py
+# but would be part of the data preparation (curate_news_for_sentiment_finetuning.py)
+# or used by the inference service.
+# instruction_template_example: "Instruction: What is the sentiment of this news? Please choose an answer from {negative/neutral/positive}.\nInput: {input}\nAnswer: "
+
+# Note on peft_model_path:
+# The original `peft_model_path` from the flat structure was for *inference* service.
+# For *fine-tuning*, if one were to continue fine-tuning an existing LoRA adapter,
+# the underlying training script would need an argument like `--resume_from_checkpoint` or
+# `--peft_model_to_load`. This is not explicitly handled by the current
+# `execute_fingpt_sentiment_finetune.py` parameter extraction for `hyperparameters`
+# but could be added to `general_config` if the underlying script supports it.
+# The `models/fingpt_lora_adapters/us_equity_sentiment_chatglm2_latest` is an *output* of this
+# fine-tuning process (or rather, a symlink/copy managed by an MLOps process to the latest version).

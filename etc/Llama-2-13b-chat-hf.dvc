@@ -1,0 +1,14 @@
+md5: b1bf2d94980be8b9a55c37ae65932ee0
+frozen: true
+deps:
+- md5: e36d80e5033f91f202c414c878f735d9.dir
+  size: 78097243850
+  nfiles: 43
+  hash: md5
+  path: D:\models\NousResearch_Llama-2-13b-hf
+outs:
+- md5: e36d80e5033f91f202c414c878f735d9.dir
+  size: 78097243850
+  nfiles: 43
+  hash: md5
+  path: Llama-2-13b-chat-hf
