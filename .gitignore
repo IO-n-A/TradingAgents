@@ -27,3 +27,6 @@ notes/
 *secret*
 *API_KEY*
 *API_SECRET*
+# Large binary files
+setup/downloads/nvidia-driver/*.run
+*.deb
