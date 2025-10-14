@@ -1,0 +1,53 @@
+# MLOps/config/rl_agents/elegantrl_sac_params.yaml
+# Placeholder configuration for an ElegantRL SAC agent
+
+framework: elegantrl
+agent_name: SAC # Should match a name recognized by ElegantRLAdaptor or ElegantRL library
+
+# Environment configuration path (if needed, or handled by the training script)
+# environment_config_path: "MLOps/config/environments/stock_trading_env_config.yaml"
+
+# Training hyperparameters
+total_timesteps: 100000 # Example value for SAC, often requires more samples
+
+# Agent-specific hyperparameters for SAC (refer to ElegantRL documentation for actual params)
+# These are illustrative and may not directly map to ElegantRL's Arguments class structure.
+# The ElegantRLAdaptor will need to translate these into the format ElegantRL expects.
+learning_rate: 0.0003 # Common learning rate for SAC
+gamma: 0.99 # Discount factor
+tau: 0.005 # Target network update rate (Polyak averaging)
+alpha: 0.2 # Entropy regularization coefficient (can be auto-tuned in some SAC versions)
+buffer_size: 1000000 # Size of the replay buffer
+batch_size: 256 # Batch size for training
+target_update_interval: 1 # Frequency of target network updates (in terms of training steps)
+gradient_steps: 1 # Number of gradient steps per environment step
+learning_starts: 10000 # Number of steps before starting training (to fill buffer)
+max_grad_norm: 1.0 # Max gradient norm for gradient clipping (if used by ElegantRL's SAC)
+
+# Network architecture (example, actual structure depends on ElegantRL's net definitions)
+# SAC typically has separate actor and critic networks
+net_dims_actor: [256, 256]  # Example for actor network
+net_dims_critic: [256, 256] # Example for critic network(s)
+# activation_function_actor: "relu" # Example
+# activation_function_critic: "relu" # Example
+
+# Optimizer (ElegantRL typically uses Adam by default for SAC)
+# optimizer_name_actor: "adam"
+# optimizer_name_critic: "adam"
+
+# Other potential parameters (ElegantRL specific)
+if_on_policy: False # SAC is an off-policy algorithm
+# gpu_id: 0 # Specify GPU ID, -1 for CPU
+# random_seed: 42
+# break_step: 2000000 # Max timesteps for training run
+# eval_gap: 10000 # Timesteps between evaluations
+# eval_times: 3 # Number of episodes for evaluation
+
+
+# Placeholder for any other parameters required by the ElegantRL SAC agent or training process
+# For example, parameters related to automatic alpha tuning, specific optimizers, etc.
+# auto_tune_alpha: true # If ElegantRL supports automatic entropy tuning
+
+# Note: This is a placeholder. Actual parameters and their structure
+# will depend on the specific implementation within ElegantRL and how
+# the ElegantRLAdaptor consumes them.

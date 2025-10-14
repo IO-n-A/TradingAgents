@@ -1,0 +1,47 @@
+# MLOps/hyperparameters/sentiment_model_params.yaml
+# This file stores configurations for sentiment analysis models.
+# These configurations can be loaded by the SentimentAnalyzerService.
+
+# Default Llama-2 13B model for sentiment analysis (example from FinGPT)
+llama2_13b_sentiment:
+  model_name_or_path: "models/NousResearch_Llama-2-13b-hf/" # Base model
+  lora_weights_path: "FinNLP/fingpt/fingpt-sentiment_llama2-13b_lora" # LoRA adapter for sentiment
+  tokenizer_name_or_path: "models/NousResearch_Llama-2-13b-hf/" # Or specific tokenizer if different
+  device: "cuda:0" # Specify "cuda:0" for GPU or "cpu"
+  bitsandbytes_config: # Optional: For quantization
+    load_in_8bit: true
+    # For 4-bit quantization (example):
+    # load_in_4bit: true
+    # bnb_4bit_quant_type: 'nf4'
+    # bnb_4bit_use_double_quant: true
+    # bnb_4bit_compute_dtype: torch.float16
+
+# Example ChatGLM2 model for sentiment analysis (example from FinGPT)
+chatglm2_6b_sentiment:
+  model_name_or_path: "models/THUDM_chatglm2-6b/"
+  lora_weights_path: "models/fingpt_lora_adapters/us_equity_sentiment_chatglm2_latest" # Strategy I sentiment LoRA
+  tokenizer_name_or_path: "models/THUDM_chatglm2-6b/"
+  device: "cuda:0"
+  bitsandbytes_config: # Optional: For quantization
+    load_in_8bit: true # Or configure for 4-bit if preferred/available
+
+# Example Falcon model for sentiment analysis (example from FinGPT Benchmark)
+falcon_7b_sentiment:
+  model_name_or_path: "models/tiiuae_falcon-7b-instruct/"
+  lora_weights_path: "FinNLP/fingpt-mt_falcon-7b_lora" # Example multi-task LoRA
+  tokenizer_name_or_path: "models/tiiuae_falcon-7b-instruct/"
+  device: "cuda:0"
+  bitsandbytes_config:
+    load_in_8bit: true # Falcon models often require careful quantization
+
+# Configuration for a sentiment model without LoRA (using a base model directly, if applicable)
+# This might be a smaller, specialized sentiment model or a general LLM used zero-shot.
+base_model_zero_shot_sentiment:
+  model_name_or_path: "distilbert-base-uncased-finetuned-sst-2-english" # Example of a smaller sentiment model
+  lora_weights_path: null # No LoRA weights
+  tokenizer_name_or_path: "distilbert-base-uncased-finetuned-sst-2-english"
+  device: "cpu" # Suitable for smaller models
+  bitsandbytes_config: null # No quantization by default for smaller models
+
+# Add other sentiment model configurations as needed for experiments or different use cases.
+# Ensure paths to models and LoRA weights are correct (local paths or Hugging Face identifiers).

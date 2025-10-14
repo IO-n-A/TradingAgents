@@ -1,0 +1,27 @@
+stages:
+  ingest_data:
+    cmd: python MLOps/pipelines/data_ingestion/data_ingestion_pipeline.py --mode prod
+    deps:
+    - MLOps/pipelines/data_ingestion/data_ingestion_pipeline.py
+    - MLOps/config/data_sources.yaml
+    - config/api_keys.yaml
+    outs:
+    - data/raw/stock_data
+    - data/raw/news_data
+    # Note: DVC automatically tracks the .dvc files for these directories,
+    # so explicitly listing them here links the stage to those tracked outputs.
+
+  engineer_features:
+    cmd: python MLOps/pipelines/feature_engineering/build_features.py
+    deps:
+    - MLOps/pipelines/feature_engineering/build_features.py
+    - MLOps/config/data_sources.yaml
+    - data/raw/stock_data   # Dependency on the output of ingest_data
+    - data/raw/news_data    # Dependency on the output of ingest_data
+    outs:
+    - data/processed
+  link_llama_model_external_source:
+    cmd: cmd /C mklink /D models\NousResearch_Llama-2-7b-chat-hf D:\models\NousResearch_Llama-2-7b-chat-hf
+    outs:
+    - models/NousResearch_Llama-2-7b-chat-hf:
+        cache: false

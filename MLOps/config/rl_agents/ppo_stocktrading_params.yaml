@@ -1,0 +1,41 @@
+# MLOps/config/rl_agents/ppo_stocktrading_params.yaml
+
+# Default PPO parameters for stock trading_
+# These can be overridden by specific experiment configurations.
+
+agent_name: "PPO" # Proximal Policy Optimization
+
+# Network architecture for actor and critic
+# Example: two hidden layers with 128 neurons each
+net_dims: [128, 128]
+
+# Learning rate for the optimizer
+learning_rate: 0.0001 # Typical value for PPO, can be 1e-4 or similar
+
+# Batch size for training
+batch_size: 2048 # Common batch size for PPO
+
+# Discount factor for future rewards
+gamma: 0.99 # Standard discount factor
+
+# Path to the environment configuration YAML file
+# This allows linking specific agent params to specific environment setups.
+environment_config_path: "MLOps/config/environments/stock_trading_env_config.yaml"
+
+# PPO-specific hyperparameters (refer to Stable Baselines3 or ElegantRL PPO docs)
+n_steps: 2048       # Number of steps to run for each environment per update
+ent_coef: 0.01      # Entropy coefficient for the loss calculation
+vf_coef: 0.5        # Value function coefficient for the loss calculation
+gae_lambda: 0.95    # Factor for trade-off of bias vs variance for Generalized Advantage Estimator
+n_epochs: 10        # Number of epoch when optimizing the surrogate loss
+clip_range: 0.2     # Clipping parameter, it can be a function
+# policy_kwargs:      # Additional arguments to pass to the policy network, e.g., dict(net_arch=[dict(pi=[128, 128], vf=[128, 128])])
+
+# Other common parameters
+# seed: null # Set for reproducibility, can be overridden
+# verbose: 1 # Verbosity level
+
+# Parameters for ElegantRL PPO (if used, names might differ slightly)
+# target_step: 10000 # target_step for ElegantRL (similar to n_steps * num_rollout_steps)
+# eval_gap: 2000    # Evaluate the agent every eval_gap steps
+# eval_times: 3     # Number of episodes to evaluate at each evaluation step
