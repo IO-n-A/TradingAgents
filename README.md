@@ -1,6 +1,4 @@
-# FinAI_algo
-
-## Abstract
+# TradingAgents
 
 A comprehensive financial AI algorithms toolkit integrating natural language processing, reinforcement learning for trading, MLOps pipelines, and modular components for advanced financial analysis and automation. The system provides:
 
@@ -13,6 +11,31 @@ A comprehensive financial AI algorithms toolkit integrating natural language pro
 - **Open Data**: Uses public APIs and datasets with proper attribution and compliance
 
 The toolkit combines FinNLP, FinRL-Meta, and custom MLOps components into a unified framework for financial AI research and application.
+
+### Attribution
+```bib
+@misc{yang2024finrobotopensourceaiagent,
+      title={FinRobot: An Open-Source AI Agent Platform for Financial Applications using Large Language Models}, 
+      author={Hongyang Yang and Boyu Zhang and Neng Wang and Cheng Guo and Xiaoli Zhang and Likun Lin and Junlin Wang and Tianyu Zhou and Mao Guan and Runjia Zhang and Christina Dan Wang},
+      year={2024},
+      eprint={2405.14767},
+      archivePrefix={arXiv},
+      primaryClass={q-fin.ST},
+      url={https://arxiv.org/abs/2405.14767}, 
+}
+
+@misc{liu2022finrlmetamarketenvironmentsbenchmarks,
+      title={FinRL-Meta: Market Environments and Benchmarks for Data-Driven Financial Reinforcement Learning}, 
+      author={Xiao-Yang Liu and Ziyi Xia and Jingyang Rui and Jiechao Gao and Hongyang Yang and Ming Zhu and Christina Dan Wang and Zhaoran Wang and Jian Guo},
+      year={2022},
+      eprint={2211.03107},
+      archivePrefix={arXiv},
+      primaryClass={q-fin.TR},
+      url={https://arxiv.org/abs/2211.03107}, 
+}
+```
+
+
 
 ## Contents
 - [Key Features](#key-features)
@@ -86,14 +109,20 @@ The architecture emphasizes modularity, allowing components to be used independe
 ## File Structure
 
 ```
-FinAI_algo/
+TradingAgents/
 ├── README.md                  # Comprehensive documentation
 ├── LICENSE                    # MIT license
-├── requirements*.txt          # Python dependencies
+├── requirements-dev-windows.txt # Development dependencies (Windows)
+├── requirements-windows.txt   # Runtime dependencies (Windows)
 ├── environment.yml            # Conda environment specification
+├── setup.cfg                  # Setup configuration
+├── .gitignore                 # Git ignore patterns
+├── .gitmodules                # Git submodules
 │
 ├── FinNLP/                    # Financial NLP library
 ├── FinRLmeta/                 # RL trading framework
+├── FinRobot/                  # AI agent platform
+├── TensorRT-LLM/              # LLM optimization framework
 │
 ├── MLOps/                     # MLOps infrastructure
 │   ├── config/                # Pipeline configurations
@@ -105,9 +134,13 @@ FinAI_algo/
 │
 ├── coding/                    # Custom trading algorithms
 ├── configs/                   # API keys and settings
+├── core/                      # Core functionality
 ├── debug/                     # Debug logs and diagnostics
 ├── etc/                       # Models, utilities, and assets
+├── setup/                     # Setup scripts
 │
+├── cuda-keyring_1.1-1_all.deb # CUDA keyring (multiple copies)
+├── dvc.yaml                   # Data version control
 ├── data/                      # (gitignored) Input datasets
 ├── figures/                   # (gitignored) Generated plots
 ├── models/                    # (gitignored) Trained models
