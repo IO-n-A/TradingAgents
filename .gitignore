@@ -18,6 +18,7 @@ figures/
 models/
 logs/
 notes/
+setup/
 
 # Environment and configuration files with sensitive data
 *.env
