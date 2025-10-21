@@ -1,0 +1,57 @@
+# MLOps/config/orchestration/strategy_1_main_config.yaml
+# Main configuration for the Strategy 1 End-to-End Orchestrator.
+
+global_settings:
+  log_level: "INFO" # DEBUG, INFO, WARNING, ERROR, CRITICAL
+  # This path should point to the LoRA adapter directory from the *previous*
+  # fine-tuning cycle, to be used by the current feature engineering step.
+  # Example: "models/fingpt_lora_adapters/chatglm2_sentiment_yyyymmdd_hhmmss"
+  # This path will be updated by the MLOps model management process in a real scenario.
+  # For initial runs, this might be empty or point to a pre-trained generic adapter if available.
+  current_lora_adapter_path: "models/FinGPT_fingpt-mt_chatglm2-6b_lora/"
+
+pipeline_steps:
+  daily_data_collection:
+    enabled: true
+    script_path: "MLOps/orchestration/daily_data_collection_orchestrator.py"
+    # Assuming daily_data_collection_orchestrator.py also takes a --config argument
+    config_path: "MLOps/config/orchestration/daily_data_collection_config.yaml" # Example path
+    args: {}
+
+  feature_engineering_strategy_1:
+    enabled: true
+    script_path: "MLOps/pipelines/feature_engineering/strategy_1_feature_pipeline.py"
+    # strategy_1_feature_pipeline.py needs to be able to accept --config
+    # and also --lora_adapter_path (which is passed by the main orchestrator)
+    config_path: "MLOps/config/pipelines/feature_engineering_strategy_1_config.yaml" # Example path
+    args: {} # lora_adapter_path will be added here by the orchestrator
+
+  finrl_model_training:
+    enabled: true
+    script_path: "MLOps/pipelines/training/finrl_us_equity_momentum_train.py"
+    # finrl_us_equity_momentum_train.py needs to accept --config
+    config_path: "MLOps/config/pipelines/training/finrl_us_equity_momentum_train_config.yaml" # Example path
+    args: {}
+
+  fingpt_sentiment_finetune:
+    enabled: true
+    script_path: "MLOps/orchestration/scheduled_fingpt_sentiment_finetune_orchestrator.py"
+    # scheduled_fingpt_sentiment_finetune_orchestrator.py needs to accept --config
+    # This step produces the LoRA adapters for the *next* cycle.
+    config_path: "MLOps/config/orchestration/scheduled_fingpt_finetune_config.yaml" # Example path
+    args: {}
+
+# Notes:
+# 1. Each script called by this orchestrator (e.g., daily_data_collection_orchestrator.py,
+#    strategy_1_feature_pipeline.py, etc.) should be designed to accept a `--config`
+#    argument pointing to its own specific YAML configuration file.
+# 2. The `strategy_1_feature_pipeline.py` script, when called, will receive an
+#    additional `--lora_adapter_path` argument from the main orchestrator if
+#    `current_lora_adapter_path` is set in `global_settings`. This path will then be used
+#    by `fingpt_sentiment_analyzer_service.py` within that feature pipeline.
+# 3. The paths to sub-configs (e.g., `MLOps/config/orchestration/daily_data_collection_config.yaml`)
+#    are examples and should correspond to actual configuration files for those scripts.
+# 4. The `current_lora_adapter_path` is crucial for the feedback loop. It's assumed that an
+#    MLOps process (outside this script's direct responsibility for *this* run) handles
+#    validating and promoting the output of `fingpt_sentiment_finetune` to become the
+#    `latest_validated_chatglm2_sentiment_adapter` for the *next* orchestration cycle.

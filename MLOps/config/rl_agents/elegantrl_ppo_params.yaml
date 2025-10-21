@@ -1,0 +1,50 @@
+# MLOps/config/rl_agents/elegantrl_ppo_params.yaml
+# Placeholder configuration for an ElegantRL PPO agent
+
+framework: elegantrl
+agent_name: PPO # Should match a name recognized by ElegantRLAdaptor or ElegantRL library
+
+# Environment configuration path (if needed, or handled by the training script)
+# environment_config_path: "MLOps/config/environments/stock_trading_env_config.yaml"
+
+# Training hyperparameters
+total_timesteps: 50000 # Example value
+
+# Agent-specific hyperparameters for PPO (refer to ElegantRL documentation for actual params)
+# These are illustrative and may not directly map to ElegantRL's Arguments class structure.
+# The ElegantRLAdaptor will need to translate these into the format ElegantRL expects.
+learning_rate: 0.0001
+gamma: 0.99
+lambda_gae: 0.95 # GAE lambda
+clip_epsilon: 0.2 # PPO clip range
+target_kl: 0.01 # Target KL divergence (if using PPO-KLPEN)
+entropy_coef: 0.01
+value_loss_coef: 0.5
+epochs: 10 # Number of epochs per PPO update
+batch_size: 64 # Batch size for training
+n_steps: 2048 # Number of steps to collect per update (rollout buffer size)
+max_grad_norm: 0.5 # Max gradient norm for gradient clipping
+
+# Network architecture (example, actual structure depends on ElegantRL's net definitions)
+net_dims: [256, 256] # Example: two hidden layers with 256 units each
+# activation_function: "relu" # Example: 'relu', 'tanh' - ElegantRL might default this
+
+# Optimizer (ElegantRL typically uses Adam by default for PPO)
+# optimizer_name: "adam"
+
+# Other potential parameters (ElegantRL specific)
+if_on_policy: True # PPO is an on-policy algorithm
+# gpu_id: 0 # Specify GPU ID, -1 for CPU
+# random_seed: 42
+# break_step: 2000000 # Max timesteps for training run
+# eval_gap: 10000 # Timesteps between evaluations
+# eval_times: 3 # Number of episodes for evaluation
+
+# Placeholder for any other parameters required by the ElegantRL agent or training process
+# For example, parameters related to replay buffer, specific optimizers, etc.
+# buffer_size: 1000000 # If applicable for an off-policy PPO variant (unlikely for standard PPO)
+# target_step: 5000 # For target network updates if applicable
+
+# Note: This is a placeholder. Actual parameters and their structure
+# will depend on the specific implementation within ElegantRL and how
+# the ElegantRLAdaptor consumes them.

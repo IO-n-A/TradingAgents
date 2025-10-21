@@ -1,0 +1,33 @@
+# Sensitive files containing keys, tokens, passwords, secrets
+configs/master_api_keys.yaml
+configs/api_keys.yaml
+configs/config_api_keys
+etc/mcp_settings.json
+coding/agent_stderr.txt
+coding/agent_stdout.txt
+
+# Logs and debug files
+*.log
+*.csv
+debug/
+cache/
+
+# Data and output directories
+data/
+figures/
+models/
+logs/
+notes/
+setup/
+
+# Environment and configuration files with sensitive data
+*.env
+*key*
+*token*
+*password*
+*secret*
+*API_KEY*
+*API_SECRET*
+# Large binary files
+setup/downloads/nvidia-driver/*.run
+*.deb

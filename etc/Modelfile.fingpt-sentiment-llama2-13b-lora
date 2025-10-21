@@ -1,0 +1,3 @@
+FROM base-llama2-13b-dvc
+ADAPTER ./data/lora_adapters/fingpt-sentiment_llama2-13b_lora/adapter_model.bin
+# Add any other necessary parameters if known
